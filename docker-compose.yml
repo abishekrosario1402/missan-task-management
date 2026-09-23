@@ -1,0 +1,38 @@
+services:
+
+  db:
+    image: postgres:16
+    container_name: missan_postgres
+    environment:
+      POSTGRES_DB: missan_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: missan_backend
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/missan_db
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend/frontend
+    container_name: missan_frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
