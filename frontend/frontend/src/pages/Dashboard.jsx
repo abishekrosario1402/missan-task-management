@@ -4,6 +4,7 @@ import {
   getMe,
   getProjects,
   createProject,
+  updateProject,
   deleteProject,
 } from "../api/api";
 
@@ -16,6 +17,10 @@ function Dashboard() {
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const [editProjectId, setEditProjectId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   const token = localStorage.getItem("token");
 
@@ -46,6 +51,12 @@ function Dashboard() {
     }
   };
 
+  const handleEditProject = (project) => {
+    setEditProjectId(project.id);
+    setEditTitle(project.title);
+    setEditDescription(project.description || "");
+  };
+
   const handleCreateProject = async () => {
     setError("");
 
@@ -64,6 +75,40 @@ function Dashboard() {
 
       setTitle("");
       setDescription("");
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleUpdateProject = async () => {
+    setError("");
+
+    if (!editTitle.trim()) {
+      setError("Project title is required");
+      return;
+    }
+
+    try {
+      const updatedProject = await updateProject(
+        token,
+        editProjectId,
+        {
+          title: editTitle,
+          description: editDescription,
+        }
+      );
+
+      setProjects((current) =>
+        current.map((project) =>
+          project.id === editProjectId
+            ? updatedProject
+            : project
+        )
+      );
+
+      setEditProjectId(null);
+      setEditTitle("");
+      setEditDescription("");
     } catch (err) {
       setError(err.message);
     }
@@ -180,15 +225,22 @@ function Dashboard() {
                   </p>
 
                   <div className="project-actions">
-
                     <button
+                      className="open-button"
                       onClick={() =>
-                        navigate(
-                          `/projects/${project.id}`
-                        )
+                        navigate(`/projects/${project.id}`)
                       }
                     >
                       Open
+                    </button>
+
+                    <button
+                      className="edit-button"
+                      onClick={() =>
+                        handleEditProject(project)
+                      }
+                    >
+                      Edit
                     </button>
 
                     <button
@@ -199,8 +251,75 @@ function Dashboard() {
                     >
                       Delete
                     </button>
-
                   </div>
+
+                  {editProjectId && (
+                    <div className="modal-overlay">
+                      <div className="edit-modal">
+                        <div className="edit-modal-header">
+                          <div>
+                            <h2>Edit Project</h2>
+                            <p>Update your project details</p>
+                          </div>
+
+                          <button
+                            className="modal-close"
+                            onClick={() => {
+                              setEditProjectId(null);
+                              setEditTitle("");
+                              setEditDescription("");
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <div className="edit-modal-body">
+                          <label>Project Title</label>
+
+                          <input
+                            type="text"
+                            value={editTitle}
+                            onChange={(e) =>
+                              setEditTitle(e.target.value)
+                            }
+                            placeholder="Project title"
+                          />
+
+                          <label>Project Description</label>
+
+                          <textarea
+                            value={editDescription}
+                            onChange={(e) =>
+                              setEditDescription(e.target.value)
+                            }
+                            placeholder="Project description"
+                            rows="5"
+                          />
+                        </div>
+
+                        <div className="edit-modal-actions">
+                          <button
+                            className="cancel-button"
+                            onClick={() => {
+                              setEditProjectId(null);
+                              setEditTitle("");
+                              setEditDescription("");
+                            }}
+                          >
+                            Cancel
+                          </button>
+
+                          <button
+                            className="save-button"
+                            onClick={handleUpdateProject}
+                          >
+                            Save Changes
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                 </div>
 

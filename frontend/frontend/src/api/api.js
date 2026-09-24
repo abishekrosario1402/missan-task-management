@@ -77,12 +77,28 @@ export const deleteProject = (token, id) =>
     },
   });
 
-  export const getTasks = (token, projectId) =>
-  request(`/projects/${projectId}/tasks`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const getTasks = (token, projectId, filters = {}) => {
+  const params = new URLSearchParams();
+
+  if (filters.status) {
+    params.append("status", filters.status);
+  }
+
+  if (filters.priority) {
+    params.append("priority", filters.priority);
+  }
+
+  const query = params.toString();
+
+  return request(
+    `/projects/${projectId}/tasks${query ? `?${query}` : ""}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
 
 export const createTask = (token, projectId, task) =>
   request(`/projects/${projectId}/tasks`, {
