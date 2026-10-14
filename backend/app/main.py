@@ -15,6 +15,7 @@ from app.schemas import (
 
 app = FastAPI(title="Task Management API", version="1.0.0")
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Create tables when the application starts.
 Base.metadata.create_all(bind=engine)
