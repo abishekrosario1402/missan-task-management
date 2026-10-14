@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir --retries 10 --timeout 180 -r requirements.txt
+RUN pip --disable-pip-version-check install --no-cache-dir --progress-bar off --retries 20 --timeout 600 -r requirements.txt
 
 COPY . .
 

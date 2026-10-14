@@ -34,3 +34,5 @@ uvicorn==0.53.0
 watchfiles==1.3.0
 websockets==17.1
 pytest
+httpx2
+
